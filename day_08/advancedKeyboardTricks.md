@@ -62,6 +62,8 @@ These shortcuts save significant time during terminal work.
 
 ---
 
+---
+
 ## clearing the screen
 
 Clear terminal output:
@@ -72,14 +74,12 @@ Ctrl + L
 
 This does not remove command history. It only clears visible terminal output.
 
----
-
 ## autocomplete with TAB
 
 The shell supports automatic completion.
 
 Example:
-cd Doc<TAB>
+cd Doc `<TAB>`
 
 May expand to:
 cd Documents
@@ -148,6 +148,7 @@ These are process control shortcuts, not text editing shortcuts.
 ## practical workflow
 
 Example:
+
 1. run long command
 2. Up Arrow to reuse it
 3. Ctrl + A to move to start
@@ -162,6 +163,7 @@ This is normal terminal productivity workflow.
 ## summary
 
 Key concepts:
+
 - history stores commands
 - Ctrl + R searches history
 - keyboard shortcuts edit command lines quickly
