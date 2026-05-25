@@ -1,196 +1,184 @@
 # Linux Command Line Notes (Part I - Chapter 7: Seeing the World as the Shell Sees It)
 
-This chapter explains how the shell interprets characters, words, paths, and special symbols.
+This chapter explains how the shell interprets everything you type before it executes a command.
 
-The goal is to understand how Linux “reads” commands differently from humans, and why quoting, expansion, and escaping matter.
+The shell does not execute raw text. It performs expansions, substitutions, and parsing rules that transform input into final commands.
 
-The shell is not confused — it is just extremely literal and rules-based.
+Understanding this is critical for avoiding unexpected behavior.
 
----
+## pathname expansion
 
-## echo
-
-echo prints text to stdout.
-
-Example:
-echo hello
-
-Output:
-hello
-
-The shell processes input first, then echo simply prints the result.
-
----
-
-## expansion
-
-The shell expands special characters before executing commands.
-
-Example:
-echo *
-
-The * is not passed to echo directly. The shell expands it into a list of files in the current directory.
-
-This is called pathname expansion.
-
----
-
-## wildcards
-
-Common wildcards:
-
-*   matches anything
-?   matches a single character
+Pathname expansion (globbing) matches patterns to filenames.
 
 Examples:
+*.txt        all text files
+file*        files starting with "file"
+???.log      files with exactly 3 characters before .log
+
+The shell expands patterns before executing the command.
+
+Example:
 ls *.txt
-ls file?.txt
 
-The shell replaces patterns with matching filenames before execution.
+Becomes:
+ls file1.txt file2.txt
 
----
+## tilde expansion
 
-## quoting
+~ expands to the current user's home directory.
 
-Quoting controls how the shell interprets special characters.
+Examples:
+cd ~
+cd ~/Documents
 
-### single quotes
-
-Strong protection. Everything is literal.
-
-Example:
-echo '*'
-
-Output:
-*
-
-Nothing is expanded inside single quotes.
-
----
-
-### double quotes
-
-Weak protection. Most characters are literal, but some expansions still happen.
+Also:
+~user expands to another user's home directory (if allowed).
 
 Example:
-echo "$HOME"
+cd ~root
 
-Output:
-/home/user
+## arithmetic expansion
 
-Variables still expand inside double quotes.
+The shell can evaluate arithmetic expressions.
 
----
-
-## escaping (\)
-
-Backslash removes special meaning from the next character.
+Syntax:
+$(( expression ))
 
 Example:
-```
-echo \*
-```
+echo $((2 + 3))
+
+Supported operations:
++ - * / % (modulo)
+
+Example:
+echo $((10 * 5))
+
+## brace expansion
+
+Brace expansion generates multiple strings.
+
+Examples:
+echo file{1,2,3}.txt
+
 Output:
-*
+file1.txt file2.txt file3.txt
 
-The shell treats * as a normal character.
+Ranges:
+echo {1..5}
 
----
+Output:
+1 2 3 4 5
 
-## variables
+Example:
+mkdir project{A,B,C}
 
-Shell variables store values.
+Creates multiple directories at once.
+
+## parameter expansion
+
+Parameter expansion accesses variables.
 
 Example:
 echo $HOME
 
 Common variables:
-HOME → user home directory
-PATH → directories where commands are searched
+$USER → current username
+$PATH  → directories where commands are searched
+$HOME  → user home directory
 
----
-
-## PATH
-
-PATH is a list of directories the shell searches for commands.
+Default value syntax:
+${VAR:-default}
 
 Example:
-echo $PATH
-
-When you type a command, the shell checks each directory in PATH to find an executable.
-
----
+echo ${NAME:-unknown}
 
 ## command substitution
 
 Command output can be used inside another command.
+Command substitution uses output of a command as input.
+
+Syntax:
+$(command)
 
 Example:
 echo $(date)
 
-The shell runs date first, then replaces it with its output.
-
----
-
-## arithmetic expansion
-
-The shell can perform math.
+Older syntax:
+`command`
 
 Example:
-echo $((2 + 3))
+echo `whoami`
+
+Command is executed first, then replaced with its output.
+
+## quoting rules
+
+Quoting controls how the shell interprets special characters.
+
+### double quotes ""
+
+Preserve most characters but allow expansions.
+
+Example:
+echo "$HOME"
+
+Output expands HOME variable.
+
+### single quotes ''
+
+Preserve everything literally.
+
+Example:
+echo '$HOME'
 
 Output:
-5
+$HOME
 
----
+No expansion happens.
 
-## seeing how shell processes a command
+## escaping characters
+
+Escaping removes special meaning from characters.
 
 Example:
-echo *.txt
+echo \$HOME
 
-Step-by-step:
-1. shell finds *.txt
-2. expands it to matching filenames
-3. passes expanded list to echo
-4. echo prints result
+Output:
+$HOME
 
-The command never sees the asterisk.
+Backslash tells shell to treat next character literally.
 
-P.S. glob expands only if there are matches. If no files match, the pattern is passed as-is.
+## backslashes
 
----
+Backslash is used for:
 
-## common confusion
+- escaping special characters
+- breaking long lines
 
-Why this happens:
-echo *
+Example:
+echo "hello \
+world"
 
-Because shell expands first, not the command.
-
-Why this does NOT work as expected sometimes:
-Programs receive processed input, not raw text.
-
----
+Output:
+hello world
 
 ## summary
 
-Shell processes everything before execution.
+The shell transforms input before execution using:
 
-Key concepts:
-- expansion replaces patterns with values
-- quotes control interpretation
-- escape removes special meaning
-- variables store data
-- PATH defines command lookup
-- command substitution inserts output into commands
-
----
+- pathname expansion (globbing)
+- tilde expansion (~)
+- arithmetic expansion ($(( )))
+- brace expansion ({ })
+- parameter expansion ($VAR)
+- command substitution ($( ))
+- quoting (" ", ' ')
+- escaping (\)
 
 ## philosophy
 
-You are not typing commands directly into programs.
+What you type is not what runs.
 
-You are writing instructions for the shell, and the shell transforms them before anything runs.
+The shell rewrites your input first, then executes the result.
 
-Understanding this difference is the key to predictable Linux behavior.
+Understanding this prevents confusion and unpredictable command behavior.
